@@ -33,11 +33,25 @@ This repository contains code to model the 2022 Nord Stream pipeline events and 
 1. Run `runBC.m` to run the model and store results in `.mat` files in `validation`.
 2. Run `plotBC.m` to load results from `.mat` files in `validation` and make plots, which are stored in `validationFigures`.
 
-### Nord Stream events
+### Gas discharge hides small explosions
 
-1. Run `runCompareMassAll.m` to run the model and make plots for the SE event and NE events at three different leak locations. It first calls `runCompareMass.m` to run the model and store results in `.mat` files in `compareMass`. Then it calls `plotCompareMass.m` to load results from `.mat` files and make plots, which are stored in `compareMassFigures`. The `plotCompareMass.m` script calls `plotCompareMassSolution.m` to plot the bubble solution and `plotCompareMassSeismograms.m` to plot seismograms and spectra. Disable saving of plots (but they will still appear in figure windows) by setting `savePlot = false` at the top of the `runCompareMassAll.m` script.
-2. Run `plotCompareMassWithWithoutGasDischarge.m` to load results from `.mat` files in `compareMass` and make plots comparing seismograms and spectra from models with and without gas discharge. These are stored in `compareMassFigures`.
-3. Step 1, which calls `plotCompareMass.m`, only produces seismograms for a single event. This is sufficient for Nord Stream SE, but Nord Stream NE was comprised of at least three events at different locations. Run `plotNorthSeismograms.m` to load results from `.mat` files in `compareMass`, use superposition to create seismograms from multiple events, and make plots, which are stored in `compareMassFigures`.
+1. Run `hiddenExplosion.m` to run the model for various pipeline pressures and yields. Plots are stored in `hiddenExplosionFigures`.
+
+### Nord Stream SE event
+
+1. Run `runCompareMassSE.m` to run the model and make plots for the SE event . It first calls `runCompareMass.m` to run the model and store results in `.mat` files in `compareMass`. Then it calls `plotCompareMass.m` to load results from `.mat` files and make plots, which are stored in `compareMassFigures`. The `plotCompareMass.m` script calls `plotCompareMassSeismograms.m` to plot seismograms and spectra. Disable saving of plots (but they will still appear in figure windows) by setting `savePlot = false` at the top of `runCompareMassSE.m`.
+2. `runCompareMassSE.m` will also call `plotCompareMassWithWithoutGasDischarge.m` to load results from `.mat` files in `compareMass` and make plots comparing seismograms and spectra from models with and without gas discharge. These are stored in `compareMassFigures`.
+
+### Nord Stream NE events with preferred crustal model
+
+1. Run `runCompareMassNE.m` which uses the preferred C2_100_100 crustal velocity and attenuation model for the NE events. This script will first run `runCompareMassNE.m` three times, once for each the three different leak locations, using a similar procedure to `runCompareMassSE.m`. It will also make plots with `runCompareMassNE.m` and `plotCompareMassWithWithoutGasDischarge.m`.
+2. The seismograms from `runCompareMassNE.m` and `plotCompareMassWithWithoutGasDischarge.m` are for a single event only, whereas Nord Stream NE was comprised of at least three events at different locations. Thus, `velocityModelsNE.m` next calls `plotNorthSeismograms.m` to load results from `.mat` files in the `compareMass` folder, use superposition to create seismograms from multiple events at different locations, and make plots, which are stored in `compareMassFigures`.
+
+### Nord Stream NE events with alternative crustal models
+
+1. `velocityModelsNE.m` explores different crustal velocity and attenuation models. Change `study` at the top of `velocityModelsNE.m`, which sets `velModels` to a list of the Green's functions (velocity models) to be compared. This can be done for two parameter studies in the paper or for a different set of velocity models.
+2. The script will run loop over the different velocity models. It calls `runCompareMass.m` to run the model and store results in `.mat` files in folders named `compareMass` appended by the velocity model name. It is set up to model only events at the leakNE-1A location, for computational efficiency.
+3. The script will produce composite seismograms constructed by superposition of three events, similar to the NE event sequence (with two events having gas discharge and one being an explosion only), except that all are located at the leakNE-1A location, again for computational efficiency. The plots are made by calling either `plotNorthSeismograms.m`, which makes separate plots for each velocity model, or `velocityModelsNE_compare.m` for the two parameter studies in the paper, which makes single plots comparing different velocity models.
 
 ### Additional scripts
 
@@ -51,7 +65,7 @@ This repository contains code to model the 2022 Nord Stream pipeline events and 
 * `runModel.m` is the function that initializes the class, runs the model (for explosions only, explosions with gas discharge, and gas discharge only), and convolves the moment rate with the Green's functions to generate synthetic seismograms. This is done for one set of parameters. This function is called by `runCompareMass.m`, `runValidation.m`, and `runBC.m`, for example.
 * `loadGF.m` and `loadGF_pyrocko.m' are used to load the Green's functions.
 * `loadSeismicData.m` loads the seismic data. `loadStations.m` loads station information.
-* There are a few other helper functions for things like windowing, Fourier transforms of real-valued time series, and computing the envelope of a seismogram.
+* There are a few other helper functions for things like windowing and computing the envelope of a seismogram.
 
 ***
 
